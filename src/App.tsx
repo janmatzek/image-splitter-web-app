@@ -15,17 +15,18 @@ import {
   Flex,
   Divider,
   Input,
+  Spinner,
 } from "@chakra-ui/react";
 import "./App.css";
 import axios from "axios";
 import JSZip from "jszip";
 
-// TODO: Loading spinner while processing image
 // TODO: refactor to use App.css for styling
 // TODO: Tests and error handling
 // TODO: Mobile version
 
 function App() {
+  const [loading, setLoading] = useState<boolean>(false);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState<boolean>(false);
@@ -38,8 +39,10 @@ function App() {
   const [zipUrl, setZipUrl] = useState<string>("");
 
   const handleProcessClick = async () => {
+    setLoading(true);
     if (!uploadedFile) {
       alert("Please upload an image first.");
+      setLoading(false);
       return;
     }
 
@@ -86,9 +89,10 @@ function App() {
       }
       console.log("Unzipped files:", files); // Debug: Log unzipped files
       setFiles(files);
+      setLoading(false);
     } catch (error) {
       console.error(error);
-      // Handle error
+      setLoading(false);
     }
   };
   const handleStripesChange = () => {
@@ -167,7 +171,7 @@ function App() {
 
   return (
     <>
-      <Box className="app-wrapper">
+      <Box className="app-wrapper" width="100%">
         <Box className="page-title">
           <Heading as="h1">Insta-friendly image splitter</Heading>
           <Divider margin="10px" />
@@ -196,7 +200,7 @@ function App() {
               <Box
                 width="450px"
                 height="150px"
-                bg={dragging ? "green.300" : "green.200"}
+                background={dragging ? "green.300" : "green.200"}
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
@@ -217,7 +221,7 @@ function App() {
                 onDragOver={handleDragOver}
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
-                bg={dragging ? "gray.300" : "gray.200"}
+                background={dragging ? "gray.300" : "gray.200"}
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
@@ -310,10 +314,11 @@ function App() {
           <Button
             marginTop="25px"
             marginBottom={"25px"}
-            isDisabled={!imageUploaded}
+            width="150px"
+            isDisabled={!imageUploaded || loading}
             onClick={handleProcessClick}
           >
-            Process image
+            {loading ? <Spinner /> : "Process image"}
           </Button>
         </Flex>
         {Object.keys(files).length > 0 && (
@@ -335,7 +340,6 @@ function App() {
           justifyContent={"center"}
           background={"gray.100"}
         >
-          {/* {Object.keys(files).length === 0 && <Text>No images to display</Text>} */}
           {Object.keys(files).map((filename) => (
             <Box
               key={filename}
