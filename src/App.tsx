@@ -20,6 +20,11 @@ import "./App.css";
 import axios from "axios";
 import JSZip from "jszip";
 
+// TODO: Loading spinner while processing image
+// TODO: refactor to use App.css for styling
+// TODO: Tests and error handling
+// TODO: Mobile version
+
 function App() {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
