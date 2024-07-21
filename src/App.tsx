@@ -211,7 +211,7 @@ function App() {
               </Box>
             ) : (
               <Box
-                width="250px"
+                width="450px"
                 height="150px"
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
@@ -296,13 +296,16 @@ function App() {
                   min={0}
                   max={100}
                   width={["75px"]}
+                  height={["40px"]}
                   onChange={handleStripeHeightChange}
                   isDisabled={!stripesYes}
                 >
                   <NumberInputField />
                 </NumberInput>{" "}
               </Flex>
-            ) : null}
+            ) : (
+              <Box height={["40px"]}></Box>
+            )}
           </Flex>
           <Button
             marginTop="25px"
@@ -313,11 +316,13 @@ function App() {
             Process image
           </Button>
         </Flex>
-        <Text>
-          Tap to download image in full resolution, scroll down to find full
-          resolution images or download a zip with all the images by clicking{" "}
-          <Link href={zipUrl}>this link</Link>.
-        </Text>
+        {Object.keys(files).length > 0 && (
+          <Text>
+            Tap to download image in full resolution, scroll down to find full
+            resolution images or download a zip with all the images by clicking{" "}
+            <Link href={zipUrl}>this link</Link>.
+          </Text>
+        )}
         <Flex
           direction="row"
           wrap="wrap"
@@ -330,7 +335,7 @@ function App() {
           justifyContent={"center"}
           background={"gray.100"}
         >
-          {Object.keys(files).length === 0 && <Text>No images to display</Text>}
+          {/* {Object.keys(files).length === 0 && <Text>No images to display</Text>} */}
           {Object.keys(files).map((filename) => (
             <Box
               key={filename}
@@ -360,11 +365,7 @@ function App() {
         <Flex direction="column" mt={4}>
           {Object.keys(files).map((filename) => (
             <Box key={filename} marginBottom={2}>
-              <Image
-                src={files[filename]}
-                alt={filename}
-                style={{ maxWidth: "100%" }}
-              />
+              <Image src={files[filename]} alt={filename} maxWidth="100%" />
             </Box>
           ))}
         </Flex>
