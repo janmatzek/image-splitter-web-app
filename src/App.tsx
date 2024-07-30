@@ -46,7 +46,7 @@ function App() {
       return;
     }
 
-    const apiEndpoint = "http://127.0.0.1:8000/process-image/";
+    const apiEndpoint = "http://62.169.21.73:8000/process-image/";
 
     const formData = new FormData();
     formData.append("file", uploadedFile);
