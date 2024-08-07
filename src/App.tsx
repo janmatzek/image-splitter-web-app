@@ -21,9 +21,7 @@ import "./App.css";
 import axios from "axios";
 import JSZip from "jszip";
 
-// TODO: refactor to use App.css for styling
-// TODO: Tests and error handling
-// TODO: Mobile version
+// TODO: Error handling
 
 function App() {
   const [loading, setLoading] = useState<boolean>(false);
@@ -37,6 +35,7 @@ function App() {
   const [stripesYes, setStripesYes] = useState<boolean>(false);
   const [files, setFiles] = useState<Record<string, string>>({});
   const [zipUrl, setZipUrl] = useState<string>("");
+  const [filesProcessed, setFilesProcessed] = useState<boolean>(false);
 
   const handleProcessClick = async () => {
     setLoading(true);
@@ -46,7 +45,7 @@ function App() {
       return;
     }
 
-    const apiEndpoint = "http://62.169.21.73:8000/process-image/";
+    const apiEndpoint = import.meta.env.VITE_API_URL;
 
     const formData = new FormData();
     formData.append("file", uploadedFile);
@@ -87,8 +86,9 @@ function App() {
           files[filename] = fileURL;
         }
       }
-      console.log("Unzipped files:", files); // Debug: Log unzipped files
+
       setFiles(files);
+      setFilesProcessed(true);
       setLoading(false);
     } catch (error) {
       console.error(error);
@@ -99,19 +99,19 @@ function App() {
     setStripesYes(!stripesYes);
   };
 
-  const handleRowsChange = (valueAsString: string, valueAsNumber: number) => {
+  const handleRowsChange = (_valueAsString: string, valueAsNumber: number) => {
     setRows(valueAsNumber);
   };
 
   const handleColumnsChange = (
-    valueAsString: string,
+    _valueAsString: string,
     valueAsNumber: number
   ) => {
     setColumns(valueAsNumber);
   };
 
   const handleStripeHeightChange = (
-    valueAsString: string,
+    _valueAsString: string,
     valueAsNumber: number
   ) => {
     setStripeHeight(valueAsNumber / 100);
@@ -171,24 +171,40 @@ function App() {
 
   return (
     <>
-      <Box className="app-wrapper" width="100%">
-        <Box className="page-title">
+      <Flex
+        className="app-wrapper"
+        maxWidth="1280px"
+        margin="0 auto"
+        padding="2rem"
+        direction="column"
+        alignItems="center"
+        minHeight="100vh"
+      >
+        <Flex
+          className="page-title"
+          direction="column"
+          alignItems="center"
+          textAlign="center"
+          marginBottom="25px"
+        >
           <Heading as="h1">Insta-friendly image splitter</Heading>
           <Divider margin="10px" />
           <Text>Upload a picture and choose how to process the image.</Text>
           <Text>
-            You can split the image to a grid of squares. Optionally, you can
-            add white stripes to top and bottom of the processed image(s).
+            You can split the image into a grid of squares. Optionally, you can
+            add white stripes to the top and bottom of the processed image(s).
           </Text>
           <Divider margin="10px" />
-        </Box>
+        </Flex>
+
         <Flex
           className="content"
           direction="column"
           alignItems="center"
-          marginTop="25px"
+          width="100%"
+          maxWidth="450px"
         >
-          <Box className="image-preview">
+          <Box className="image-preview" width="100%">
             <Input
               type="file"
               id="imageUploadInput"
@@ -196,67 +212,69 @@ function App() {
               onChange={handleImageChange}
               display="none"
             />
-            {imageSrc ? (
-              <Box
-                width="450px"
-                height="150px"
-                background={dragging ? "green.300" : "green.200"}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                cursor="pointer"
-                onClick={handleImageClick}
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-              >
-                <Text>Image uploaded!</Text>
-              </Box>
-            ) : (
-              <Box
-                width="450px"
-                height="150px"
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                background={dragging ? "gray.300" : "gray.200"}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                cursor="pointer"
-                onClick={handleImageClick}
-              >
-                <Text>
-                  Click to upload image <br />
-                  (or drag and drop the file)
-                </Text>
-              </Box>
-            )}
+            <Box
+              width="100%"
+              height="150px"
+              background={
+                imageSrc
+                  ? dragging
+                    ? "green.300"
+                    : "green.200"
+                  : dragging
+                  ? "gray.300"
+                  : "gray.200"
+              }
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              cursor="pointer"
+              onClick={handleImageClick}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+            >
+              <Text>
+                {imageSrc ? (
+                  "Image uploaded!"
+                ) : (
+                  <>
+                    Click to upload image
+                    <br />
+                    or drag and drop the file
+                  </>
+                )}
+              </Text>
+            </Box>
           </Box>
+
           <Flex
             className="image-options"
+            direction="column"
+            alignItems="center"
+            justifyContent="space-around"
             marginTop="20px"
             border="1px"
-            borderRadius={"5"}
-            borderColor={"gray.300"}
-            width="450px"
+            borderRadius="5px"
+            borderColor="gray.300"
+            width="100%"
+            maxWidth="450px"
             height="200px"
             padding="20px"
-            direction="column"
-            justifyContent="space-around"
-            alignItems="center"
           >
-            <Flex className="rows-and-columns" direction={"row"}>
-              <Flex className="input-rows" alignItems="center">
-                <Text marginRight="5px">Rows:</Text>
+            <Flex
+              direction="row"
+              alignItems="center"
+              justifyContent="center"
+              mb="10px"
+            >
+              <Flex alignItems="center" marginRight="10px">
+                <Text marginRight={["2px", "5px"]}>Rows:</Text>
                 <NumberInput
                   defaultValue={1}
                   min={1}
                   max={20}
-                  width={["75px"]}
-                  marginRight="10px"
+                  size={["sm", "md"]}
                   onChange={handleRowsChange}
                 >
                   <NumberInputField />
@@ -266,14 +284,13 @@ function App() {
                   </NumberInputStepper>
                 </NumberInput>
               </Flex>
-              <Flex className="input-columns" alignItems="center">
-                <Text marginRight="5px">Columns:</Text>
+              <Flex alignItems="center">
+                <Text marginRight={["2px", "5px"]}>Cols:</Text>
                 <NumberInput
                   defaultValue={3}
                   min={1}
                   max={20}
-                  width={["75px"]}
-                  marginRight="5px"
+                  size={["sm", "md"]}
                   onChange={handleColumnsChange}
                 >
                   <NumberInputField />
@@ -289,31 +306,31 @@ function App() {
               isChecked={stripesYes}
               onChange={handleStripesChange}
               colorScheme="teal"
+              mb="10px"
             >
               White stripes
             </Switch>
-            {stripesYes ? (
-              <Flex className="input-stripes" alignItems="center">
-                <Text marginRight="5px">Stripe height (%): </Text>
-                <NumberInput
-                  defaultValue={16}
-                  min={0}
-                  max={100}
-                  width={["75px"]}
-                  height={["40px"]}
-                  onChange={handleStripeHeightChange}
-                  isDisabled={!stripesYes}
-                >
-                  <NumberInputField />
-                </NumberInput>{" "}
-              </Flex>
-            ) : (
-              <Box height={["40px"]}></Box>
-            )}
+
+            {/* {stripesYes && ( */}
+            <Flex alignItems="center" justifyContent="center" width="100%">
+              <Text marginRight="5px">Stripe height (%): </Text>
+              <NumberInput
+                defaultValue={16}
+                min={0}
+                max={100}
+                width="75px"
+                height="40px"
+                onChange={handleStripeHeightChange}
+                isDisabled={!stripesYes}
+              >
+                <NumberInputField />
+              </NumberInput>
+            </Flex>
+            {/* )} */}
           </Flex>
+
           <Button
             marginTop="25px"
-            marginBottom={"25px"}
             width="150px"
             isDisabled={!imageUploaded || loading}
             onClick={handleProcessClick}
@@ -321,71 +338,74 @@ function App() {
             {loading ? <Spinner /> : "Process image"}
           </Button>
         </Flex>
+
         {Object.keys(files).length > 0 && (
-          <Text>
+          <Text marginTop="25px">
             Tap to download image in full resolution, scroll down to find full
             resolution images or download a zip with all the images by clicking{" "}
             <Link href={zipUrl}>this link</Link>.
           </Text>
         )}
-        <Flex
-          direction="row"
-          wrap="wrap"
-          gap={4}
-          marginTop="25px"
-          style={{
-            gridTemplateColumns: `repeat(${columns}, 1fr)`,
-            gridTemplateRows: `repeat(${rows}, auto)`,
-          }}
-          justifyContent={"center"}
-          background={"gray.100"}
-        >
+
+        {filesProcessed ? (
+          <Flex
+            direction="row"
+            wrap="wrap"
+            gap="4"
+            marginTop="25px"
+            justifyContent="center"
+            background="gray.100"
+            width="100%"
+            padding={["2", "4"]}
+          >
+            {Object.keys(files).map((filename) => (
+              <Box
+                key={filename}
+                gap="2"
+                width={`calc(100% / ${columns} - 16px)`}
+                height="auto"
+              >
+                <Link href={files[filename]} download={filename}>
+                  <Image
+                    src={files[filename]}
+                    alt={filename}
+                    width="100%"
+                    height="auto"
+                  />
+                </Link>
+              </Box>
+            ))}
+          </Flex>
+        ) : (
+          <></>
+        )}
+
+        <Flex direction="column" mt="4" width="100%">
           {Object.keys(files).map((filename) => (
-            <Box
-              key={filename}
-              marginBottom={2}
-              marginTop={2}
-              style={{
-                width: `calc(100% / ${columns} - 16px)`,
-                height: "auto",
-                position: "relative",
-              }}
-            >
-              <Link href={files[filename]} download={filename}>
-                <Image
-                  src={files[filename]}
-                  alt={filename}
-                  style={{
-                    width: "100%",
-                    height: "auto",
-                    display: "block",
-                  }}
-                />
-              </Link>
+            <Box key={filename} marginBottom="2" width="100%">
+              <Image src={files[filename]} alt={filename} width="100%" />
             </Box>
           ))}
         </Flex>
 
-        <Flex direction="column" mt={4}>
-          {Object.keys(files).map((filename) => (
-            <Box key={filename} marginBottom={2}>
-              <Image src={files[filename]} alt={filename} maxWidth="100%" />
-            </Box>
-          ))}
-        </Flex>
-        <Box className="footer" marginTop="25px">
+        <Box
+          className="footer"
+          marginTop="25px"
+          textAlign="center"
+          width="100%"
+        >
           <Text>
-            Made with 🖤 by{" "}
+            Made by{" "}
             <Link
               href="https://janmatzek.github.io"
               target="_blank"
-              rel="noopener, noreferrer"
+              rel="noopener noreferrer"
             >
               Jan Matzek
             </Link>
           </Text>
         </Box>
-      </Box>
+      </Flex>
     </>
   );
 }
