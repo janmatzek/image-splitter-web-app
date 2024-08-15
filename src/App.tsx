@@ -380,13 +380,13 @@ function App() {
           <></>
         )}
 
-        <Flex direction="column" mt="4" width="100%">
+        {/*<Flex direction="column" mt="4" width="100%">
           {Object.keys(files).map((filename) => (
             <Box key={filename} marginBottom="2" width="100%">
               <Image src={files[filename]} alt={filename} width="100%" />
             </Box>
           ))}
-        </Flex>
+        </Flex>*/}
 
         <Box
           className="footer"
